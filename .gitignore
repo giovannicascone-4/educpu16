@@ -1,0 +1,7 @@
+.DS_Store
+
+# Build artifacts
+build/
+assembler_bin
+*.o
+*.dSYM/
