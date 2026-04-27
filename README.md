@@ -27,6 +27,7 @@ educpu16/
 - A C11 compiler: `gcc` or `clang` (`cc` on macOS)
 - GNU `make`
 - `bash` (for the end-to-end test script)
+- Windows users: WSL or Git Bash required to run the test script and Makefile
 
 No third-party libraries required.
 
