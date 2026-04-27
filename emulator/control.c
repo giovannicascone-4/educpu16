@@ -69,30 +69,30 @@ void cpu_step(CPU *cpu) {
         break;
 
     case OP_JMP:
-        cpu->pc = (uint16_t)(cpu->pc + off - 1);
+        cpu->pc = (uint16_t)(cpu->pc + off);
         break;
 
     case OP_JEQ:
         if ((cpu->flags & FLAG_ZF) != 0u) {
-            cpu->pc = (uint16_t)(cpu->pc + off - 1);
+            cpu->pc = (uint16_t)(cpu->pc + off);
         }
         break;
 
     case OP_JNE:
         if ((cpu->flags & FLAG_ZF) == 0u) {
-            cpu->pc = (uint16_t)(cpu->pc + off - 1);
+            cpu->pc = (uint16_t)(cpu->pc + off);
         }
         break;
 
     case OP_JLT:
         if ((cpu->flags & FLAG_NF) != 0u) {
-            cpu->pc = (uint16_t)(cpu->pc + off - 1);
+            cpu->pc = (uint16_t)(cpu->pc + off);
         }
         break;
 
     case OP_JGT:
         if ((cpu->flags & FLAG_ZF) == 0u && (cpu->flags & FLAG_NF) == 0u) {
-            cpu->pc = (uint16_t)(cpu->pc + off - 1);
+            cpu->pc = (uint16_t)(cpu->pc + off);
         }
         break;
 
@@ -100,7 +100,7 @@ void cpu_step(CPU *cpu) {
         mem_write(cpu->sp, cpu->pc);
         cpu->sp = (uint16_t)(cpu->sp - 1u);
         cpu->regs[7] = cpu->sp;
-        cpu->pc = (uint16_t)(cpu->pc + off - 1);
+        cpu->pc = (uint16_t)(cpu->pc + off);
         break;
 
     case OP_RET:
