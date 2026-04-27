@@ -1,140 +1,168 @@
-# CPU Design FA25 - ISA Overview
+# educpu16 — A 16-Bit Software CPU
 
-This project currently focuses on the Instruction Set Architecture (ISA) contract and the assembler pipeline.
+A complete software CPU implemented in C, including a two-pass assembler,
+a cycle-accurate emulator with memory-mapped I/O, and three assembly programs
+that run on it end-to-end.
 
-## What Is an ISA?
+## Repository Structure
 
-An ISA (Instruction Set Architecture) is the agreement between software and CPU hardware (or emulator).  
-It defines:
+```
+educpu16/
+  assembler/            Two-pass assembler (lexer, parser, encoder, symtable)
+    isa.h               Shared ISA contract — opcodes, formats, memory map
+  emulator/             CPU emulator (ALU, control unit, memory, MMIO)
+  programs/             Assembly programs
+    timer_example.asm   Fetch/Compute/Store cycle using the hardware timer
+    hello.asm           Prints "Hello, World!" via memory-mapped I/O
+    fibonacci.asm       Computes the first 10 Fibonacci numbers
+  tests_assembler/      Encoder unit tests
+  tests_emulator/       ALU unit tests and FDE integration tests
+  tests_programs/       End-to-end program tests
+  Makefile              Builds the emulator; runs all test suites
+  Makefile_assembler    Builds the assembler
+```
 
-- What instructions exist (for example `ADD`, `LW`, `JMP`)
-- How each instruction is encoded in bits
-- How registers and memory are addressed
-- What behavior each instruction must produce
+## Prerequisites
 
-In this project, the ISA is the shared interface used by both sides:
+- A C11 compiler: `gcc` or `clang` (`cc` on macOS)
+- GNU `make`
+- `bash` (for the end-to-end test script)
 
-- **Assembler side (Gio):** converts assembly mnemonics into 16-bit machine words
-- **Emulator side (Nikhil):** decodes those words and executes the defined behavior
+No third-party libraries required.
 
-Because both components depend on the same instruction definitions, the ISA header must remain stable.
+## Build
 
-## Kunal's ISA Contract in This Repo
-
-Kunal's contribution is represented by `assembler/isa.h`, which provides:
-
-- Opcode constants (`OP_ADD` through `OP_HALT`)
-- Register and memory constants (`NUM_REGS`, `MEM_SIZE`, I/O addresses, stack base)
-- Field extraction helpers (`INSTR_OPCODE`, `INSTR_RD`, `INSTR_RS1`, `INSTR_RS2`)
-- Signed decode helpers for immediates/offsets (`INSTR_IMM5`, `INSTR_OFFSET`, `INSTR_IMM15`)
-
-These definitions let every component interpret instruction words the same way.
-
-## Instruction Formats
-
-All instructions are 16-bit words. The core formats are:
-
-- **R-format:** opcode + destination/source register fields (register-register operations)
-- **I-format:** opcode + registers + small immediate (`imm5`)
-- **J-format:** opcode + signed PC-relative jump offset
-
-The assembler encodes these formats in `assembler/encoder.c`, and tests verify round-trip correctness in `tests_assembler/test_encoder.c`.
-
-## Why This Matters
-
-If assembler encoding and emulator decoding disagree by even one bit, programs break.  
-A single shared ISA header prevents that mismatch and keeps the project modular:
-
-- Kunal defines the contract
-- Gio assembles to that contract
-- Nikhil executes that contract
-- Dhruv's assembly programs rely on the same contract
-
-## Current Project Scope
-
-At this stage, the repository is aligned to:
-
-- Completed: ISA contract + assembler components + emulator runtime
-- Not implemented yet: final assembly program deliverables
-
-This keeps the work split consistent with team roles and avoids premature cross-component coupling.
-
-## Quick Start
-
-Use the assembler makefile at project root.
-
-### Build Assembler
-
+**Assembler:**
 ```bash
 make -f Makefile_assembler all
 ```
+Produces `./assembler_bin`.
 
-This produces the assembler binary:
-
-- `./assembler_bin`
-
-### Run Encoder Tests
-
-```bash
-make -f Makefile_assembler test
-```
-
-Expected success line:
-
-```text
-all encoder round-trip tests passed
-```
-
-### Clean Build Artifacts
-
-```bash
-make -f Makefile_assembler clean
-```
-
-### Assemble a Program (Example)
-
-After you create an assembly source file (for example `program.asm`), run:
-
-```bash
-./assembler_bin program.asm -o program.bin --listing
-```
-
-This generates `program.bin` and prints a listing with address, encoded word, and source line.
-
-## Emulator
-
-### Build Emulator
-
-Use the root makefile:
-
+**Emulator:**
 ```bash
 make
 ```
+Produces `./emulator_bin`.
 
-This builds:
+## Test Suite
 
-- `./emulator_bin`
-
-### Emulator CLI Usage
+Run all tests with a single command:
 
 ```bash
-./emulator_bin <file.bin>
-./emulator_bin <file.bin> --dump
-./emulator_bin <file.bin> --step
-./emulator_bin <file.bin> --trace
-./emulator_bin <file.bin> --dump --addr 0x0100
+make -f Makefile_assembler test   # assembler encoder round-trip tests
+make test                         # ALU unit tests + FDE integration tests + program end-to-end tests
 ```
 
-One-liner: run `make test` to build and execute the emulator ALU unit tests.
+Expected output:
+```
+all encoder round-trip tests passed
+all emulator ALU tests passed
+all emulator integration tests passed
 
-Supported flags:
+educpu16 — end-to-end program tests
+======================================
 
-- `--dump`: dump memory after execution
-- `--step`: interactive single-step mode (press Enter between steps)
-- `--trace`: print CPU state every step until halt
-- `--addr X`: hex dump start address (accepts `0x0100` or `0100`), used with `--dump`
+[ timer_example ]
+  PASS  assembles without error
+  PASS  emulator exits cleanly
+  PASS  result written to 0x0200 ...
 
-Default dump window:
+[ fibonacci ]
+  PASS  assembles without error
+  PASS  emulator exits cleanly
+  PASS  first 8 terms correct at 0x0300 (0,1,1,2,3,5,8,13)
+  PASS  last 2 terms correct at 0x0308 (21,34)
 
-- without `--addr`: `0x0000` to `0x0100`
-- with `--addr X`: starts at `X` and dumps the next 256 bytes
+[ hello ]
+  PASS  assembles without error
+  PASS  emulator exits cleanly
+  PASS  stdout is exactly 'Hello, World!'
+
+======================================
+10 / 10 tests passed
+all program tests passed
+```
+
+## Programs
+
+Assemble a program and run it:
+
+```bash
+./assembler_bin programs/<name>.asm -o <name>.bin
+./emulator_bin  <name>.bin [flags]
+```
+
+### timer_example
+
+Reads the hardware timer (`IO_TIMER = 0xFF02`), adds 42, stores the result at `0x0200`.
+Demonstrates a single Fetch / Compute / Store cycle.
+
+```bash
+./assembler_bin programs/timer_example.asm -o timer_example.bin
+./emulator_bin  timer_example.bin --dump --addr 0200
+```
+
+The first word at `0x0200` contains `timer_value + 42`.
+
+### hello
+
+Prints `Hello, World!` to the console by writing each character to the
+memory-mapped stdout port (`IO_STDOUT = 0xFF00`).
+
+```bash
+./assembler_bin programs/hello.asm -o hello.bin
+./emulator_bin  hello.bin
+```
+
+### fibonacci
+
+Computes `F(0)` through `F(9)` and stores each value in RAM starting at `0x0300`.
+
+```bash
+./assembler_bin programs/fibonacci.asm -o fibonacci.bin
+./emulator_bin  fibonacci.bin --dump --addr 0300
+```
+
+Expected output:
+```
+0300: 0000 0001 0001 0002 0003 0005 0008 000D
+0308: 0015 0022 ...
+```
+In decimal: `0, 1, 1, 2, 3, 5, 8, 13, 21, 34`
+
+## Emulator Flags
+
+| Flag | Effect |
+|------|--------|
+| `--trace` | Print full CPU state after every instruction |
+| `--step` | Interactive single-step mode (press Enter to advance) |
+| `--dump` | Hex dump a memory region after the program halts |
+| `--addr 0xXXXX` | Start address for `--dump` (default `0x0000`) |
+
+Assembler flag:
+
+| Flag | Effect |
+|------|--------|
+| `--listing` | Print address, encoded word, and source line for every instruction |
+| `--symbols` | Print the symbol table after assembly |
+
+## ISA Overview
+
+All instructions are 16-bit words. Three formats:
+
+| Format | Layout | Used by |
+|--------|--------|---------|
+| R | `op[15:11] rd[10:8] rs1[7:5] rs2[4:2] func[1:0]` | ADD, SUB, AND, OR, XOR, NOT, SHL, SHR, CMP |
+| I | `op[15:11] rd[10:8] rs1[7:5] imm5[4:0]` | ADDI, LW, SW, MOV |
+| J | `op[15:11] offset11[10:0]` | JMP, JEQ, JNE, JLT, JGT, CALL, RET |
+
+Registers: `R0`–`R7` (8 general-purpose, 16-bit). `R7` doubles as the stack pointer.
+
+Memory-mapped I/O ports:
+
+| Address | Port |
+|---------|------|
+| `0xFF00` | `IO_STDOUT` — write a character to stdout |
+| `0xFF01` | `IO_STDIN` — read a character from stdin |
+| `0xFF02` | `IO_TIMER` — read the current timer tick |
+| `0xFEFF` | `STACK_BASE` — initial stack pointer |
