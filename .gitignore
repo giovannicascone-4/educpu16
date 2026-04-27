@@ -3,5 +3,7 @@
 # Build artifacts
 build/
 assembler_bin
+emulator_bin
 *.o
+*.bin
 *.dSYM/

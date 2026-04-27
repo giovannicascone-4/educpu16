@@ -54,8 +54,8 @@ A single shared ISA header prevents that mismatch and keeps the project modular:
 
 At this stage, the repository is aligned to:
 
-- Completed: ISA contract + assembler components
-- Not implemented yet: emulator runtime and final assembly program deliverables
+- Completed: ISA contract + assembler components + emulator runtime
+- Not implemented yet: final assembly program deliverables
 
 This keeps the work split consistent with team roles and avoids premature cross-component coupling.
 
@@ -100,3 +100,41 @@ After you create an assembly source file (for example `program.asm`), run:
 ```
 
 This generates `program.bin` and prints a listing with address, encoded word, and source line.
+
+## Emulator
+
+### Build Emulator
+
+Use the root makefile:
+
+```bash
+make
+```
+
+This builds:
+
+- `./emulator_bin`
+
+### Emulator CLI Usage
+
+```bash
+./emulator_bin <file.bin>
+./emulator_bin <file.bin> --dump
+./emulator_bin <file.bin> --step
+./emulator_bin <file.bin> --trace
+./emulator_bin <file.bin> --dump --addr 0x0100
+```
+
+One-liner: run `make test` to build and execute the emulator ALU unit tests.
+
+Supported flags:
+
+- `--dump`: dump memory after execution
+- `--step`: interactive single-step mode (press Enter between steps)
+- `--trace`: print CPU state every step until halt
+- `--addr X`: hex dump start address (accepts `0x0100` or `0100`), used with `--dump`
+
+Default dump window:
+
+- without `--addr`: `0x0000` to `0x0100`
+- with `--addr X`: starts at `X` and dumps the next 256 bytes
