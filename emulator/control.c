@@ -3,6 +3,7 @@
 #include "alu.h"
 #include "memory.h"
 #include <stddef.h>
+#include <stdio.h>
 
 void cpu_step(CPU *cpu) {
     uint8_t op;
@@ -114,6 +115,9 @@ void cpu_step(CPU *cpu) {
         break;
 
     default:
+        fprintf(stderr, "illegal instruction: opcode=0x%02X at PC=0x%04X\n",
+                op, (uint16_t)(cpu->pc - 1u));
+        cpu->halted = true;
         break;
     }
 }
