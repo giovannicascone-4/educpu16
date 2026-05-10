@@ -1,8 +1,11 @@
 # educpu16 — A 16-Bit Software CPU
 
-A complete software CPU implemented in C, including a two-pass assembler,
-a cycle-accurate emulator with memory-mapped I/O, and three assembly programs
-that run on it end-to-end.
+A complete software CPU implemented in C, including a two-pass assembler, a cycle-accurate emulator with memory-mapped I/O, and three assembly programs that run on it end-to-end.
+
+## Demo Video
+
+Google Drive Link: [Watch the demo](https://drive.google.com/file/d/1pPRM6jjPZEVv7ONwJN2HXCZpQcDIIZ2Q/view?usp=sharing) 
+
 
 ## Repository Structure
 
@@ -21,6 +24,41 @@ educpu16/
   Makefile              Builds the emulator; runs all test suites
   Makefile_assembler    Builds the assembler
 ```
+
+## CPU Schematic
+
+<p align="center">
+  <img src="./cpu_schematic_formal.svg" alt="educpu16 CPU architecture schematic" width="900" />
+</p>
+<p align="center"><em>Figure 1: educpu16 CPU architecture (block diagram).</em></p>
+
+```mermaid
+flowchart LR
+    PC["Program Counter (pc)"]
+    MEM["Unified Memory\n64K words: 0x0000 - 0xFFFF"]
+    IR["Instruction Register (ir)"]
+    CTRL["Control Unit\nfetch / decode / execute"]
+    REG["Register File\nR0 - R7\nR7 used as stack pointer"]
+    SP["Stack Pointer\nsp mirrors R7\ninit = 0xFEFF"]
+    ALU["ALU\nADD SUB AND OR XOR NOT SHL SHR CMP"]
+    FLAGS["Flags Register\nZF NF CF OF"]
+    MMIO["Memory-Mapped I/O\n0xFF00 STDOUT\n0xFF01 STDIN\n0xFF02 TIMER\n0xFF03 STATUS"]
+
+    PC -->|"instruction address"| MEM
+    MEM -->|"instruction word"| IR
+    IR --> CTRL
+    CTRL -->|"select op / branch / load / store"| REG
+    CTRL -->|"ALU control"| ALU
+    REG -->|"rs1 / rs2"| ALU
+    ALU -->|"result"| REG
+    ALU --> FLAGS
+    FLAGS -->|"branch decisions"| CTRL
+    REG -->|"base address + store data"| MEM
+    MEM -->|"load data"| REG
+    REG --- SP
+    MEM --- MMIO
+```
+<p align="center"><em>Figure 2: educpu16 CPU architecture.</em></p>
 
 ## Prerequisites
 
@@ -107,8 +145,7 @@ The first word at `0x0200` contains `timer_value + 42`.
 
 ### hello
 
-Prints `Hello, World!` to the console by writing each character to the
-memory-mapped stdout port (`IO_STDOUT = 0xFF00`).
+Prints `Hello, World!` to the console by writing each character to the memory-mapped stdout port (`IO_STDOUT = 0xFF00`).
 
 ```bash
 ./assembler_bin programs/hello.asm -o hello.bin
@@ -155,7 +192,7 @@ All instructions are 16-bit words. Three formats:
 |--------|--------|---------|
 | R | `op[15:11] rd[10:8] rs1[7:5] rs2[4:2] func[1:0]` | ADD, SUB, AND, OR, XOR, NOT, SHL, SHR, CMP |
 | I | `op[15:11] rd[10:8] rs1[7:5] imm5[4:0]` | ADDI, LW, SW, MOV |
-| J | `op[15:11] offset11[10:0]` | JMP, JEQ, JNE, JLT, JGT, CALL, RET |
+| J | `op[15:11] offset11[10:0]` | JMP, JEQ, JNE, JLT, JGT, CALL |
 
 Registers: `R0`–`R7` (8 general-purpose, 16-bit). `R7` doubles as the stack pointer.
 
@@ -166,4 +203,5 @@ Memory-mapped I/O ports:
 | `0xFF00` | `IO_STDOUT` — write a character to stdout |
 | `0xFF01` | `IO_STDIN` — read a character from stdin |
 | `0xFF02` | `IO_TIMER` — read the current timer tick |
+| `0xFF03` | `IO_STATUS` — reserved/status-mapped address in ISA |
 | `0xFEFF` | `STACK_BASE` — initial stack pointer |

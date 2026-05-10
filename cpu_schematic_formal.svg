@@ -1,0 +1,133 @@
+<svg width="1500" height="920" viewBox="0 0 1500 920" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">educpu16 formal CPU block diagram</title>
+  <desc id="desc">Clean textbook-style block diagram for the educpu16 software CPU, showing program counter, instruction register, control unit, register file, ALU, flags, stack pointer, unified memory, and memory-mapped I/O.</desc>
+  <defs>
+    <style>
+      .bg { fill: #ffffff; }
+      .outline { fill: none; stroke: #111111; stroke-width: 2; }
+      .box { fill: #ffffff; stroke: #111111; stroke-width: 1.6; }
+      .shade { fill: #f6f6f6; stroke: #111111; stroke-width: 1.6; }
+      .mmio { fill: #eef5ff; stroke: #111111; stroke-width: 1.6; }
+      .title { font: 700 28px Arial, sans-serif; fill: #111111; }
+      .subtitle { font: 600 18px Arial, sans-serif; fill: #111111; }
+      .label { font: 600 13px Arial, sans-serif; fill: #111111; }
+      .text { font: 15px Arial, sans-serif; fill: #111111; }
+      .small { font: 13px Arial, sans-serif; fill: #111111; }
+      .mono { font: 13px 'Courier New', monospace; fill: #111111; }
+      .line { stroke: #111111; stroke-width: 1.7; fill: none; }
+      .bus { stroke: #111111; stroke-width: 2.3; fill: none; }
+      .dash { stroke-dasharray: 7 6; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="8.5" refY="4" orient="auto">
+      <polygon points="0,0 10,4 0,8" fill="#111111"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1500" height="920"/>
+
+  <text class="title" x="750" y="48" text-anchor="middle">educpu16 CPU Architecture</text>
+  <text class="text" x="750" y="76" text-anchor="middle">Implementation-based block diagram</text>
+
+  <rect class="box" x="90" y="180" width="210" height="360"/>
+  <text class="subtitle" x="195" y="220" text-anchor="middle">Unified Memory</text>
+  <text class="mono" x="195" y="250" text-anchor="middle">0x0000 - 0xFFFF</text>
+  <line class="line" x1="120" y1="272" x2="270" y2="272"/>
+  <text class="small" x="195" y="314" text-anchor="middle">Instructions + data</text>
+  <text class="small" x="195" y="344" text-anchor="middle">Fetch: mem[pc] -&gt; ir</text>
+  <text class="small" x="195" y="374" text-anchor="middle">Data: LW / SW</text>
+  <text class="small" x="195" y="418" text-anchor="middle">Single word-addressable</text>
+  <text class="small" x="195" y="442" text-anchor="middle">memory space</text>
+
+  <rect class="mmio" x="90" y="590" width="210" height="180"/>
+  <text class="subtitle" x="195" y="628" text-anchor="middle">MMIO</text>
+  <text class="mono" x="195" y="660" text-anchor="middle">0xFF00  STDOUT</text>
+  <text class="mono" x="195" y="688" text-anchor="middle">0xFF01  STDIN</text>
+  <text class="mono" x="195" y="716" text-anchor="middle">0xFF02  TIMER</text>
+  <text class="mono" x="195" y="744" text-anchor="middle">0xFF03  STATUS</text>
+
+  <rect class="outline" x="390" y="130" width="840" height="640"/>
+  <text class="subtitle" x="810" y="162" text-anchor="middle">CPU</text>
+
+  <rect class="shade" x="470" y="210" width="170" height="92"/>
+  <text class="subtitle" x="555" y="247" text-anchor="middle">PC</text>
+  <text class="mono" x="555" y="277" text-anchor="middle">program counter</text>
+
+  <rect class="shade" x="900" y="210" width="170" height="92"/>
+  <text class="subtitle" x="985" y="247" text-anchor="middle">IR</text>
+  <text class="mono" x="985" y="277" text-anchor="middle">instruction register</text>
+
+  <rect class="box" x="670" y="360" width="200" height="100"/>
+  <text class="subtitle" x="770" y="398" text-anchor="middle">Control Unit</text>
+  <text class="small" x="770" y="428" text-anchor="middle">fetch / decode / execute</text>
+
+  <rect class="box" x="450" y="560" width="250" height="120"/>
+  <text class="subtitle" x="575" y="598" text-anchor="middle">Register File</text>
+  <text class="mono" x="575" y="630" text-anchor="middle">R0 R1 R2 R3 R4 R5 R6 R7</text>
+  <text class="small" x="575" y="656" text-anchor="middle">8 x 16-bit registers</text>
+
+  <rect class="box" x="820" y="560" width="170" height="120"/>
+  <text class="subtitle" x="905" y="598" text-anchor="middle">ALU</text>
+  <text class="small" x="905" y="628" text-anchor="middle">ADD SUB AND OR XOR</text>
+  <text class="small" x="905" y="650" text-anchor="middle">NOT SHL SHR CMP</text>
+
+  <rect class="box" x="1080" y="560" width="120" height="80"/>
+  <text class="subtitle" x="1140" y="595" text-anchor="middle">Flags</text>
+  <text class="mono" x="1140" y="620" text-anchor="middle">Z N C O</text>
+
+  <rect class="box" x="1080" y="670" width="120" height="80"/>
+  <text class="subtitle" x="1140" y="705" text-anchor="middle">SP</text>
+  <text class="mono" x="1140" y="730" text-anchor="middle">sp / R7</text>
+
+  <line class="line" x1="300" y1="256" x2="470" y2="256" marker-end="url(#arrow)"/>
+  <text class="label" x="385" y="238" text-anchor="middle">instruction address</text>
+
+  <line class="line" x1="640" y1="256" x2="900" y2="256" marker-end="url(#arrow)"/>
+  <text class="label" x="770" y="238" text-anchor="middle">instruction word</text>
+
+  <line class="line" x1="985" y1="302" x2="840" y2="360" marker-end="url(#arrow)"/>
+  <text class="label" x="930" y="340" text-anchor="middle">decoded fields</text>
+
+  <line class="line" x1="690" y1="460" x2="620" y2="560" marker-end="url(#arrow)"/>
+  <text class="label" x="632" y="510" text-anchor="middle">register select</text>
+
+  <line class="line" x1="840" y1="460" x2="880" y2="560" marker-end="url(#arrow)"/>
+  <text class="label" x="885" y="514" text-anchor="middle">ALU control</text>
+
+  <line class="line" x1="700" y1="606" x2="820" y2="606" marker-end="url(#arrow)"/>
+  <text class="label" x="760" y="588" text-anchor="middle">rs1, rs2</text>
+
+  <line class="line" x1="820" y1="636" x2="700" y2="636" marker-end="url(#arrow)"/>
+  <text class="label" x="760" y="662" text-anchor="middle">result</text>
+
+  <line class="line" x1="990" y1="600" x2="1080" y2="600" marker-end="url(#arrow)"/>
+  <text class="label" x="1035" y="582" text-anchor="middle">flag update</text>
+
+  <line class="line dash" x1="1080" y1="582" x2="870" y2="430" marker-end="url(#arrow)"/>
+  <text class="label" x="980" y="472" text-anchor="middle">branch conditions</text>
+
+  <line class="bus" x1="300" y1="430" x2="380" y2="430"/>
+  <line class="bus" x1="380" y1="430" x2="380" y2="700"/>
+  <line class="bus" x1="380" y1="700" x2="450" y2="700"/>
+  <text class="label" x="305" y="412">data / address bus</text>
+
+  <line class="line" x1="450" y1="652" x2="380" y2="652" marker-end="url(#arrow)"/>
+  <text class="label" x="415" y="634" text-anchor="middle">store / base</text>
+
+  <line class="line" x1="380" y1="612" x2="450" y2="612" marker-end="url(#arrow)"/>
+  <text class="label" x="415" y="594" text-anchor="middle">load</text>
+
+  <line class="line dash" x1="990" y1="690" x2="1080" y2="710" marker-end="url(#arrow)"/>
+  <text class="label" x="1035" y="676" text-anchor="middle">CALL / RET</text>
+
+  <line class="line dash" x1="195" y1="540" x2="195" y2="590" marker-end="url(#arrow)"/>
+  <text class="label" x="250" y="568">mapped in memory</text>
+
+  <rect class="box" x="1260" y="210" width="160" height="180"/>
+  <text class="subtitle" x="1340" y="246" text-anchor="middle">Key Facts</text>
+  <text class="small" x="1285" y="284">• 16-bit ISA</text>
+  <text class="small" x="1285" y="312">• 8 registers</text>
+  <text class="small" x="1285" y="340">• R7 acts as SP</text>
+  <text class="small" x="1285" y="368">• Unified memory</text>
+
+  <text class="small" x="750" y="842" text-anchor="middle">Fetch from memory, decode in control, operate on registers through the ALU, update flags, and access the same memory space for data and I/O.</text>
+</svg>
